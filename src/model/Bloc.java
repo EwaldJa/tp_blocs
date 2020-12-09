@@ -22,41 +22,43 @@ public class Bloc extends MetaBloc {
     private MetaBloc goal;
     private MetaBloc inferior;
 
+    private List<MetaBloc> availableLocations;
+
     public Bloc(String name, MetaBloc goal, World world) {
         this.blocName = name;
         this.goal = goal;
         this.world = world;
     }
 
-    private List<MetaBloc> checkTheWorld() throws BlocNotFoundException {
+    public void percept() throws BlocNotFoundException {
         canMove = world.canMove(this);
         isPushed = inferior.isPushing();
-        updateSatisfaction();
-        if (canMove) { return world.getAvailableLocations(this); }
-        else { return new ArrayList<>(); }
+        if (canMove) { availableLocations = world.getAvailableLocations(this); }
+        else { availableLocations = new ArrayList<>(); }
     }
 
     private void updateSatisfaction(){
         this.satisfaction = ((isPushed)?Constants.SCORE_FOR_BEING_PUSHED:0) + ((isPushing)?Constants.SCORE_FOR_PUSHING:0) + ((goal.equals(inferior))?Constants.SCORE_FOR_GOAL:0); }
 
-    private void doAction() throws BlocNotFoundException, MovementUnavailableException {
-        List<MetaBloc> availableLocations = checkTheWorld();
+    public void action() throws BlocNotFoundException, MovementUnavailableException {
+        updateSatisfaction();
         if (satisfaction != 1.0) {
             if (!canMove) {
                 isPushing = true; }
             else {
-                inferior = world.moveToLocation(this, getPreferredLocation(availableLocations));
-                isPushed = false;
-                isPushing = false; } }
+                if (availableLocations.size() > 0) {
+                    inferior = world.moveToLocation(this, getPreferredLocation(availableLocations));
+                    isPushed = false;
+                    isPushing = false; } } }
         updateSatisfaction();
     }
 
     private MetaBloc getPreferredLocation(List<MetaBloc> availableLocations) {
+        Random rdm = new Random();
         int indexOfGoal = availableLocations.indexOf(goal);
-        if (indexOfGoal != -1) {
+        if ((indexOfGoal != -1) && (rdm.nextInt(10) > 3)) {
             return availableLocations.get(indexOfGoal); }
         else {
-            Random rdm = new Random();
             return availableLocations.get(rdm.nextInt(availableLocations.size())); }
     }
 
@@ -64,7 +66,7 @@ public class Bloc extends MetaBloc {
     public String getBlocName() { return blocName; }
 
     @Override
-    protected boolean isPushing() { return isPushing; }
+    public boolean isPushing() { return isPushing; }
 
     @Override
     public boolean equals(Object o) {
@@ -74,4 +76,21 @@ public class Bloc extends MetaBloc {
         return Objects.equals(blocName, bloc.blocName);
     }
 
+    public void setInferior(MetaBloc inferior) { this.inferior = inferior; }
+
+    @Override
+    public String toString() {
+        return String.format("Bloc %s [isPushing %b, canMove %b, isPushed %b, satisfaction %f, goal %s, inferior %s, availablelocations %s]", blocName, isPushing, canMove, isPushed, satisfaction, goal.getBlocName(), inferior.getBlocName(), getAvailableLocationsNames());
+    }
+
+    public double getSatisfaction() {
+        return satisfaction;
+    }
+
+    private String getAvailableLocationsNames() {
+        StringBuilder sb = new StringBuilder();
+        for (MetaBloc mb:availableLocations) {
+            sb.append(mb.getBlocName()).append(","); }
+        return sb.toString();
+    }
 }

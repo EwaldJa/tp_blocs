@@ -12,15 +12,21 @@ public class World {
 
     private List<List<MetaBloc>> world;
 
-    public World(int nbLocs, Table table, int nbBlocs) {
+    public World(int nbLocs, int nbBlocs) {
         nbLocation = nbLocs;
         this.nbBlocs = nbBlocs;
+    }
+
+    public void initialize(Table table, List<MetaBloc> firstStack) {
         world = new ArrayList<>();
-        for (int i = 0; i < nbLocs; i++) {
+        world.add(firstStack);
+        for (int i = 1; i < nbLocation; i++) {
             List<MetaBloc> loc = new ArrayList<>();
             loc.add(table);
             world.add(loc); }
     }
+
+
 
     public List<MetaBloc> getAvailableLocations(Bloc toCheck) {
         List<MetaBloc> availableLocations = new ArrayList<>();
@@ -34,7 +40,7 @@ public class World {
 
     public boolean canMove(Bloc toCheck) throws BlocNotFoundException {
         int currentLocation = getLocationOfBloc(toCheck);
-        return world.get(currentLocation).indexOf(toCheck) == world.get(currentLocation).size();
+        return world.get(currentLocation).indexOf(toCheck) == (world.get(currentLocation).size() - 1);
     }
 
     public MetaBloc moveToLocation(Bloc toMove, MetaBloc whereTo) throws MovementUnavailableException, BlocNotFoundException {
@@ -42,7 +48,7 @@ public class World {
         int currentLocation = getLocationOfBloc(toMove);
         List<MetaBloc> currentLoc = world.get(currentLocation);
         List<MetaBloc> newLoc = world.get(newLocation);
-        if (currentLoc.indexOf(toMove) != currentLoc.size()) { throw new MovementUnavailableException("Bloc #" + toMove.getBlocName() + " is not at the summit of the location #" + currentLocation); }
+        if (currentLoc.indexOf(toMove) != (currentLoc.size() - 1)) { throw new MovementUnavailableException("Bloc #" + toMove.getBlocName() + " is not at the summit of the location #" + currentLocation); }
         else {
             currentLoc.remove(toMove);
             newLoc.add(toMove);
@@ -50,24 +56,31 @@ public class World {
     }
 
     private int getLocationOfBloc(MetaBloc bloc) throws BlocNotFoundException {
+        boolean hasToBeFirst = false;
+        if (bloc instanceof Table) { hasToBeFirst = true; }
         for (int i = 0; i < nbLocation - 1; i++) {
             List<MetaBloc> loc = world.get(i);
-            if (loc.indexOf(bloc) != -1) { return i; } }
+            if (loc.indexOf(bloc) != -1) {
+                if (hasToBeFirst) {
+                    if (loc.indexOf(bloc) == (loc.size()-1)) {
+                        return i; } }
+                else {
+                    return i; } } }
         throw new BlocNotFoundException("Bloc #" + bloc.getBlocName() + "does not exists in the world");
     }
 
-    public void display() {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         for(int i = nbBlocs; i >= 1; i--) {
-            for (int j = nbLocation - 1; j >= 0; j --) {
+            for (int j = 0; j < nbLocation - 1; j ++) {
                 sb.append(blocTitle(world.get(j), i)).append(" ");
             }
-            System.out.print("\n");
-        }
+            sb.append("\n"); }
+        return sb.toString();
     }
 
     public String blocTitle(List<MetaBloc> pile, int index) {
-        return ((pile.size() > index) ? ("|" + pile.get(index).getBlocName() + "|") : " ");
+        return ((pile.size() > index) ? ("|" + pile.get(index).getBlocName() + "|") : "| |");
     }
 
 }

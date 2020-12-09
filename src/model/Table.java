@@ -14,7 +14,7 @@ public class Table extends MetaBloc {
     public String getBlocName() { return blocName;}
 
     @Override
-    protected boolean isPushing() { return false; }
+    public boolean isPushing() { return false; }
 
     @Override
     public boolean equals(Object o) {
