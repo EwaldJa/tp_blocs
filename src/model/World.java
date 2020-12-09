@@ -21,15 +21,13 @@ public class World {
             world.add(loc); }
     }
 
-    public MetaBloc[] getAvailableLocations(Bloc toCheck) throws BlocNotFoundException {
-        int currentLocation = getLocationOfBloc(toCheck);
-        MetaBloc[] availableLocations = new MetaBloc[nbLocation - 1];
+    public List<MetaBloc> getAvailableLocations(Bloc toCheck) {
+        List<MetaBloc> availableLocations = new ArrayList<>();
         for (int i = 0; i < nbLocation - 1; i++) {
-            if (i != currentLocation) {
-                List<MetaBloc> loc_i = world.get(i);
-                availableLocations[i] = loc_i.get(loc_i.size() - 1);
-            }
-        }
+            List<MetaBloc> loc_i = world.get(i);
+            MetaBloc summit = loc_i.get(loc_i.size() - 1);
+            if (!summit.equals(toCheck)) {
+                availableLocations.add(summit); } }
         return availableLocations;
     }
 
@@ -38,7 +36,7 @@ public class World {
         return world.get(currentLocation).indexOf(toCheck) == world.get(currentLocation).size();
     }
 
-    public MetaBloc moveToLocation(Bloc toMove, Bloc whereTo) throws MovementUnavailableException, BlocNotFoundException {
+    public MetaBloc moveToLocation(Bloc toMove, MetaBloc whereTo) throws MovementUnavailableException, BlocNotFoundException {
         int newLocation = getLocationOfBloc(whereTo);
         int currentLocation = getLocationOfBloc(toMove);
         List<MetaBloc> currentLoc = world.get(currentLocation);
@@ -47,19 +45,19 @@ public class World {
         else {
             currentLoc.remove(toMove);
             newLoc.add(toMove);
-            return newLoc.get(newLoc.size() - 2);
-        }
+            return newLoc.get(newLoc.size() - 2); }
     }
 
     private int getLocationOfBloc(MetaBloc bloc) throws BlocNotFoundException {
         for (int i = 0; i < nbLocation - 1; i++) {
             List<MetaBloc> loc = world.get(i);
-            if (loc.indexOf(bloc) != -1) { return i; }
-        }
+            if (loc.indexOf(bloc) != -1) { return i; } }
         throw new BlocNotFoundException("Bloc #" + bloc.getBlocName() + "does not exists in the world");
     }
 
     public String toString() {
         //TODO: toString
+        StringBuilder sb = new StringBuilder();
+        return sb.toString();
     }
 }
