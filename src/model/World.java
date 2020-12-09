@@ -8,12 +8,13 @@ import java.util.List;
 
 public class World {
 
-    private int nbLocation=3;
+    private int nbLocation=3, nbBlocs = 4;
 
     private List<List<MetaBloc>> world;
 
-    public World(int nbLocs, Table table) {
+    public World(int nbLocs, Table table, int nbBlocs) {
         nbLocation = nbLocs;
+        this.nbBlocs = nbBlocs;
         world = new ArrayList<>();
         for (int i = 0; i < nbLocs; i++) {
             List<MetaBloc> loc = new ArrayList<>();
@@ -55,9 +56,18 @@ public class World {
         throw new BlocNotFoundException("Bloc #" + bloc.getBlocName() + "does not exists in the world");
     }
 
-    public String toString() {
-        //TODO: toString
+    public void display() {
         StringBuilder sb = new StringBuilder();
-        return sb.toString();
+        for(int i = nbBlocs; i >= 1; i--) {
+            for (int j = nbLocation - 1; j >= 0; j --) {
+                sb.append(blocTitle(world.get(j), i)).append(" ");
+            }
+            System.out.print("\n");
+        }
     }
+
+    public String blocTitle(List<MetaBloc> pile, int index) {
+        return ((pile.size() > index) ? ("|" + pile.get(index).getBlocName() + "|") : " ");
+    }
+
 }
